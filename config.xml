@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+	<name>darwinpricing</name>
+	<displayName><![CDATA[Darwin Pricing - Geo-Targeted Sales]]></displayName>
+	<version><![CDATA[1.0.0]]></version>
+	<description><![CDATA[The most popular Geo-Pricing app on PrestaShop! Make 50% more money with geo-targeted sales campaigns. Automatic targeting optimization & High converting Exit Intent coupon box included!]]></description>
+	<author><![CDATA[Darwin Pricing]]></author>
+	<tab><![CDATA[pricing_promotion]]></tab>
+	<is_configurable>1</is_configurable>
+	<need_instance>1</need_instance>
+</module>
