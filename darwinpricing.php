@@ -1,32 +1,23 @@
 <?php
 /**
-* 2007-2015 PrestaShop
-*
-* NOTICE OF LICENSE
-*
-* This source file is subject to the Academic Free License (AFL 3.0)
-* that is bundled with this package in the file LICENSE.txt.
-* It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/afl-3.0.php
-* If you did not receive a copy of the license and are unable to
-* obtain it through the world-wide-web, please send an email
-* to license@prestashop.com so we can send you a copy immediately.
-*
-* DISCLAIMER
-*
-* Do not edit or add to this file if you wish to upgrade PrestaShop to newer
-* versions in the future. If you wish to customize PrestaShop for your
-* needs please refer to http://www.prestashop.com for more information.
-*
-*  @author    PrestaShop SA <contact@prestashop.com>
-*  @copyright 2007-2015 PrestaShop SA
-*  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
-*  International Registered Trademark & Property of PrestaShop SA
-*/
-
-if (!defined('_PS_VERSION_')) {
-    exit;
-}
+ * 2015 Darwin Pricing
+ *
+ * For support please visit www.darwinpricing.com
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the GNU Lesser General Public License (LGPL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/lgpl.txt
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@darwinpricing.com so we can send you a copy immediately.
+ *
+ *  @author    Darwin Pricing <support@darwinpricing.com>
+ *  @copyright 2015 Darwin Pricing
+ *  @license   http://www.gnu.org/licenses/lgpl.txt GNU Lesser General Public License (LGPL 3.0)
+ */
 
 class Darwinpricing extends Module
 {
@@ -138,7 +129,7 @@ class Darwinpricing extends Module
                         'col' => 3,
                         'type' => 'text',
                         'prefix' => '<i class="icon icon-globe"></i>',
-                        'desc' => $this->l('The URL of the API server for your website, e.g. https://api.darwinpricing.com'),
+                        'desc' => $this->l('The URL of the Darwin Pricing API server for your website'),
                         'name' => 'DARWINPRICING_SERVER_URL',
                         'label' => $this->l('API Server'),
                     ),
@@ -235,6 +226,7 @@ class Darwinpricing extends Module
         $parameterList = array('platform' => 'prestashop-'._PS_VERSION_, 'site-id' => $clientId);
         if ($authenticationRequired) {
             $parameterList['hash'] = $clientSecret;
+            $parameterList['visitor-ip'] = Tools::getRemoteAddr();
         }
         $apiUrl .= '?'.http_build_query($parameterList);
         return $apiUrl;
