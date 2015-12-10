@@ -39,10 +39,6 @@ class Darwinpricing extends Module
         $this->version = '1.0.0';
         $this->author = 'Darwin Pricing';
         $this->need_instance = 0;
-
-        /**
-         * Set $this->bootstrap to true if your module is compliant with bootstrap (PrestaShop 1.6)
-         */
         $this->bootstrap = true;
 
         parent::__construct();
@@ -51,37 +47,28 @@ class Darwinpricing extends Module
         $this->description = $this->l('The most popular Geo-Pricing app on PrestaShop! Make 50% more money with geo-targeted sales campaigns. Automatic targeting optimization & High converting Exit Intent coupon box included!');
     }
 
-    /**
-     * Don't forget to create update methods if needed:
-     * http://doc.prestashop.com/display/PS16/Enabling+the+Auto-Update
-     */
     public function install()
     {
-        Configuration::updateValue('DARWINPRICING_LIVE_MODE', false);
+        $this->warning = null;
 
-        return parent::install() &&
-            $this->registerHook('header') &&
-            $this->registerHook('backOfficeHeader') &&
-            $this->registerHook('displayHome') &&
-            $this->registerHook('displayPayment') &&
-            $this->registerHook('displayPaymentReturn');
+        if (is_null($this->warning) && !function_exists('curl_init')) {
+            $this->warning = $this->l('cURL is required to use this module. Please install the php extention cURL.');
+        }
+
+        if (is_null($this->warning)
+                && !(parent::install()
+                && Configuration::updateValue('DARWINPRICING_LIVE_MODE', false)
+                && $this->registerHook('header')
+                && $this->registerHook('actionValidateOrder')
+                && $this->registerHook('actionOrderReturn'))) {
+            $this->warning = $this->l('There was an error installing this module.');
+        }
+
+        return is_null($this->warning);
     }
 
-    public function uninstall()
-    {
-        Configuration::deleteByName('DARWINPRICING_LIVE_MODE');
-
-        return parent::uninstall();
-    }
-
-    /**
-     * Load the configuration form
-     */
     public function getContent()
     {
-        /**
-         * If values have been submitted in the form, process.
-         */
         if (((bool)Tools::isSubmit('submitDarwinpricingModule')) == true) {
             $this->postProcess();
         }
@@ -93,9 +80,6 @@ class Darwinpricing extends Module
         return $output.$this->renderForm();
     }
 
-    /**
-     * Create the form that will be displayed in the configuration of your module.
-     */
     protected function renderForm()
     {
         $helper = new HelperForm();
@@ -113,7 +97,7 @@ class Darwinpricing extends Module
         $helper->token = Tools::getAdminTokenLite('AdminModules');
 
         $helper->tpl_vars = array(
-            'fields_value' => $this->getConfigFormValues(), /* Add values for your inputs */
+            'fields_value' => $this->getConfigFormValues(),
             'languages' => $this->context->controller->getLanguages(),
             'id_language' => $this->context->language->id,
         );
@@ -121,9 +105,6 @@ class Darwinpricing extends Module
         return $helper->generateForm(array($this->getConfigForm()));
     }
 
-    /**
-     * Create the structure of your form.
-     */
     protected function getConfigForm()
     {
         return array(
@@ -155,15 +136,26 @@ class Darwinpricing extends Module
                     array(
                         'col' => 3,
                         'type' => 'text',
-                        'prefix' => '<i class="icon icon-envelope"></i>',
-                        'desc' => $this->l('Enter a valid email address'),
-                        'name' => 'DARWINPRICING_ACCOUNT_EMAIL',
-                        'label' => $this->l('Email'),
+                        'prefix' => '<i class="icon icon-globe"></i>',
+                        'desc' => $this->l('The URL of the API server for your website, e.g. https://api.darwinpricing.com'),
+                        'name' => 'DARWINPRICING_SERVER_URL',
+                        'label' => $this->l('API Server'),
                     ),
                     array(
-                        'type' => 'password',
-                        'name' => 'DARWINPRICING_ACCOUNT_PASSWORD',
-                        'label' => $this->l('Password'),
+                        'col' => 3,
+                        'type' => 'text',
+                        'prefix' => '<i class="icon icon-user"></i>',
+                        'desc' => $this->l('The client ID for your website'),
+                        'name' => 'DARWINPRICING_CLIENT_ID',
+                        'label' => $this->l('Client ID'),
+                    ),
+                    array(
+                        'col' => 3,
+                        'type' => 'text',
+                        'prefix' => '<i class="icon icon-key"></i>',
+                        'desc' => $this->l('The client secret for your website'),
+                        'name' => 'DARWINPRICING_CLIENT_SECRET',
+                        'label' => $this->l('Client Secret'),
                     ),
                 ),
                 'submit' => array(
@@ -173,21 +165,16 @@ class Darwinpricing extends Module
         );
     }
 
-    /**
-     * Set values for the inputs.
-     */
     protected function getConfigFormValues()
     {
         return array(
-            'DARWINPRICING_LIVE_MODE' => Configuration::get('DARWINPRICING_LIVE_MODE', true),
-            'DARWINPRICING_ACCOUNT_EMAIL' => Configuration::get('DARWINPRICING_ACCOUNT_EMAIL', 'contact@prestashop.com'),
-            'DARWINPRICING_ACCOUNT_PASSWORD' => Configuration::get('DARWINPRICING_ACCOUNT_PASSWORD', null),
+            'DARWINPRICING_LIVE_MODE' => Configuration::get('DARWINPRICING_LIVE_MODE', false),
+            'DARWINPRICING_SERVER_URL' => Configuration::get('DARWINPRICING_SERVER_URL', null),
+            'DARWINPRICING_CLIENT_ID' => Configuration::get('DARWINPRICING_CLIENT_ID', null),
+            'DARWINPRICING_CLIENT_SECRET' => Configuration::get('DARWINPRICING_CLIENT_SECRET', null),
         );
     }
 
-    /**
-     * Save form data.
-     */
     protected function postProcess()
     {
         $form_values = $this->getConfigFormValues();
@@ -197,38 +184,84 @@ class Darwinpricing extends Module
         }
     }
 
-    /**
-    * Add the CSS & JavaScript files you want to be loaded in the BO.
-    */
-    public function hookBackOfficeHeader()
+    public function hookHeader()
     {
-        if (Tools::getValue('module_name') == $this->name) {
-            $this->context->controller->addJS($this->_path.'views/js/back.js');
-            $this->context->controller->addCSS($this->_path.'views/css/back.css');
+        if ($this->isActive()) {
+            $widgetUrl = $this->getApiUrl('/widget');
+            $this->context->controller->addJS($widgetUrl);
         }
     }
 
-    /**
-     * Add the CSS & JavaScript files you want to be added on the FO.
-     */
-    public function hookHeader()
+    public function hookActionValidateOrder($params)
     {
-        $this->context->controller->addJS($this->_path.'/views/js/front.js');
-        $this->context->controller->addCSS($this->_path.'/views/css/front.css');
+        try {
+            if ($this->isActive()) {
+                $url = $this->getApiUrl('/prestashop/webhook-validate-order', true);
+                $body = Tools::jsonEncode($params);
+                $this->webhook($url, $body);
+            }
+        } catch (Exception $exception) {
+            $order = $params['order'];
+            $id_order = (int)$order->id;
+            $message = 'Darwinpricing::hookActionValidateOrder - Cannot send order details';
+            PrestaShopLogger::addLog($message, 3, null, 'Order', $id_order);
+        }
     }
 
-    public function hookDisplayHome()
+    public function hookActionOrderReturn($params)
     {
-        /* Place your code here. */
+        try {
+            if ($this->isActive()) {
+                $url = $this->getApiUrl('/prestashop/webhook-order-return', true);
+                $body = Tools::jsonEncode($params);
+                $this->webhook($url, $body);
+            }
+        } catch (Exception $exception) {
+            $orderReturn = $params['orderReturn'];
+            $id_order = $orderReturn->id_order;
+            $message = 'Darwinpricing::hookActionOrderReturn - Cannot send order return details';
+            PrestaShopLogger::addLog($message, 3, null, 'Order', $id_order);
+        }
     }
 
-    public function hookDisplayPayment()
+    protected function getApiUrl($path, $authenticationRequired)
     {
-        /* Place your code here. */
+        $serverUrl = Configuration::get('DARWINPRICING_SERVER_URL', null);
+        $clientId = Configuration::get('DARWINPRICING_CLIENT_ID', null);
+        $clientSecret = Configuration::get('DARWINPRICING_CLIENT_SECRET', null);
+        $serverUrl = rtrim($serverUrl, '/');
+        $apiUrl = $serverUrl.$path;
+        $parameterList = array('platform' => 'prestashop-'._PS_VERSION_, 'site-id' => $clientId);
+        if ($authenticationRequired) {
+            $parameterList['hash'] = $clientSecret;
+        }
+        $apiUrl .= '?'.http_build_query($parameterList);
+        return $apiUrl;
     }
 
-    public function hookDisplayPaymentReturn()
+    protected function isActive()
     {
-        /* Place your code here. */
+        $liveMode = Configuration::get('DARWINPRICING_LIVE_MODE', false);
+        $serverUrl = Configuration::get('DARWINPRICING_SERVER_URL', null);
+        $clientId = Configuration::get('DARWINPRICING_CLIENT_ID', null);
+        $clientSecret = Configuration::get('DARWINPRICING_CLIENT_SECRET', null);
+        return ($liveMode && isset($serverUrl) && isset($clientId) && isset($clientSecret));
+    }
+
+    protected function webhook($url, $body)
+    {
+        $optionList = array(
+            CURLOPT_POST => true,
+            CURLOPT_URL => $url,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT_MS => 3000,
+            CURLOPT_POSTFIELDS => $body,
+        );
+        $ch = curl_init();
+        curl_setopt_array($ch, $optionList);
+        curl_exec($ch);
+        curl_close($ch);
     }
 }

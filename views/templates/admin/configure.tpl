@@ -24,25 +24,18 @@
 *}
 
 <div class="panel">
-	<h3><i class="icon icon-credit-card"></i> {l s='Darwin Pricing - Geo-Targeted Sales' mod='darwinpricing'}</h3>
+	<h3><i class="icon icon-globe"></i> {l s='Darwin Pricing - Geo-Targeted Sales for Profit' mod='darwinpricing'}</h3>
 	<p>
-		<strong>{l s='Here is my new generic module!' mod='darwinpricing'}</strong><br />
-		{l s='Thanks to PrestaShop, now I have a great module.' mod='darwinpricing'}<br />
-		{l s='I can configure it using the following configuration form.' mod='darwinpricing'}
+		<strong>{l s='Welcome to Darwin Pricing!' mod='darwinpricing'}</strong><br />
 	</p>
 	<br />
 	<p>
-		{l s='This module will boost your sales!' mod='darwinpricing'}
+                <a href="https://www.darwinpricing.com/" target="_blank">Darwin Pricing</a> {l s='is the world\'s leading dynamic pricing solution for geo-targeted eCommerce.' mod='darwinpricing'}
+		{l s='This module will boost your eCommerce profits with an Exit Intent coupon box, geo-targeted automatically at cities where local retailers beat you on price.' mod='darwinpricing'}
 	</p>
-</div>
-
-<div class="panel">
-	<h3><i class="icon icon-tags"></i> {l s='Documentation' mod='darwinpricing'}</h3>
+	<br />
 	<p>
-		&raquo; {l s='You can get a PDF documentation to configure this module' mod='darwinpricing'} :
-		<ul>
-			<li><a href="#" target="_blank">{l s='English' mod='darwinpricing'}</a></li>
-			<li><a href="#" target="_blank">{l s='French' mod='darwinpricing'}</a></li>
-		</ul>
+                {l s='Please' mod='darwinpricing'} <a href="https://admin.darwinpricing.com/sign-up" target="_blank">{l s='create a free account' mod='darwinpricing'}</a> {l s='and' mod='darwinpricing'} <a href="https://admin.darwinpricing.com/sign-in" target="_blank">{l s='login' mod='darwinpricing'}</a> {l s='to configure your geo-targeted coupon box.' mod='darwinpricing'}
+		{l s='Then enter your credentials in the form below to activate the module!' mod='darwinpricing'}
 	</p>
 </div>
