@@ -40,6 +40,7 @@ class Darwinpricing extends Module
         $this->author = 'Darwin Pricing';
         $this->need_instance = 0;
         $this->bootstrap = true;
+        $this->module_key = 'e409b535aeefa67797bfefc958637afa';
 
         parent::__construct();
 
