@@ -216,7 +216,12 @@ class Darwinpricing extends Module
         }
     }
 
-    protected function getApiUrl($path, $authenticationRequired)
+    /**
+     * @param string $path
+     * @param bool|null $authenticationRequired
+     * @return string
+     */
+    protected function getApiUrl($path, $authenticationRequired = null)
     {
         $serverUrl = Configuration::get('DARWINPRICING_SERVER_URL', null);
         $clientId = Configuration::get('DARWINPRICING_CLIENT_ID', null);
@@ -232,6 +237,9 @@ class Darwinpricing extends Module
         return $apiUrl;
     }
 
+    /**
+     * @return bool
+     */
     protected function isActive()
     {
         $liveMode = Configuration::get('DARWINPRICING_LIVE_MODE', false);
@@ -241,6 +249,10 @@ class Darwinpricing extends Module
         return ($liveMode && isset($serverUrl) && isset($clientId) && isset($clientSecret));
     }
 
+    /**
+     * @param string $url
+     * @param string $body
+     */
     protected function webhook($url, $body)
     {
         $optionList = array(
