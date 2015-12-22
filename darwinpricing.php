@@ -241,12 +241,13 @@ class Darwinpricing extends Module
     /**
      * @return array
      */
-    protected function getValidationMessage() {
+    protected function getValidationMessage()
+    {
         $liveMode = Configuration::get('DARWINPRICING_LIVE_MODE', false);
         $serverUrl = Configuration::get('DARWINPRICING_SERVER_URL', null);
         $clientId = Configuration::get('DARWINPRICING_CLIENT_ID', null);
         $clientSecret = Configuration::get('DARWINPRICING_CLIENT_SECRET', null);
-        if (strlen($serverUrl) && strlen($clientId) && strlen($clientSecret)) {
+        if (Tools::strlen($serverUrl) && Tools::strlen($clientId) && Tools::strlen($clientSecret)) {
             if ($liveMode) {
                 return array('success' => $this->l('Settings saved successfully! You can configure the design and the geo-targeting of your coupon box in your Darwin Pricing admin.'));
             }
@@ -264,7 +265,7 @@ class Darwinpricing extends Module
         $serverUrl = Configuration::get('DARWINPRICING_SERVER_URL', null);
         $clientId = Configuration::get('DARWINPRICING_CLIENT_ID', null);
         $clientSecret = Configuration::get('DARWINPRICING_CLIENT_SECRET', null);
-        return ($liveMode && strlen($serverUrl) && strlen($clientId) && strlen($clientSecret));
+        return ($liveMode && Tools::strlen($serverUrl) && Tools::strlen($clientId) && Tools::strlen($clientSecret));
     }
 
     /**

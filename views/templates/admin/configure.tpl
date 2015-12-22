@@ -19,13 +19,13 @@
 *}
 
 {if isset($message.success)}
-<div class="alert alert-success" role="alert">{$message.success|escape}</div>
+<div class="alert alert-success" role="alert">{$message.success|escape:'htmlall':'UTF-8'}</div>
 {/if}
 {if isset($message.warning)}
-<div class="alert alert-warning" role="alert">{$message.warning|escape}</div>
+<div class="alert alert-warning" role="alert">{$message.warning|escape:'htmlall':'UTF-8'}</div>
 {/if}
 {if isset($message.danger)}
-<div class="alert alert-danger" role="alert">{$message.danger|escape}</div>
+<div class="alert alert-danger" role="alert">{$message.danger|escape:'htmlall':'UTF-8'}</div>
 {/if}
 
 <div class="panel">
