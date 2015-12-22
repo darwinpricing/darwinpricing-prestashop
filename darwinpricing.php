@@ -27,7 +27,7 @@ class Darwinpricing extends Module
     {
         $this->name = 'darwinpricing';
         $this->tab = 'pricing_promotion';
-        $this->version = '1.0.1';
+        $this->version = '1.0.2';
         $this->author = 'Darwin Pricing';
         $this->need_instance = 0;
         $this->bootstrap = true;
@@ -63,6 +63,7 @@ class Darwinpricing extends Module
     {
         if (((bool)Tools::isSubmit('submitDarwinpricingModule')) == true) {
             $this->postProcess();
+            $this->context->smarty->assign('message', $this->getValidationMessage());
         }
 
         $this->context->smarty->assign('module_dir', $this->_path);
@@ -172,7 +173,7 @@ class Darwinpricing extends Module
         $form_values = $this->getConfigFormValues();
 
         foreach (array_keys($form_values) as $key) {
-            Configuration::updateValue($key, Tools::getValue($key));
+            Configuration::updateValue($key, trim(Tools::getValue($key)));
         }
     }
 
@@ -238,6 +239,23 @@ class Darwinpricing extends Module
     }
 
     /**
+     * @return array
+     */
+    protected function getValidationMessage() {
+        $liveMode = Configuration::get('DARWINPRICING_LIVE_MODE', false);
+        $serverUrl = Configuration::get('DARWINPRICING_SERVER_URL', null);
+        $clientId = Configuration::get('DARWINPRICING_CLIENT_ID', null);
+        $clientSecret = Configuration::get('DARWINPRICING_CLIENT_SECRET', null);
+        if (strlen($serverUrl) && strlen($clientId) && strlen($clientSecret)) {
+            if ($liveMode) {
+                return array('success' => $this->l('Settings saved successfully! You can configure the design and the geo-targeting of your coupon box in your Darwin Pricing admin.'));
+            }
+            return array('warning' => $this->l('Settings saved successfully. Turn on Live mode to activate your coupon box on your store!'));
+        }
+        return array('danger' => $this->l('Some settings are missing. Please create a free Darwin Pricing account and follow the installation instructions to get your credentials.'));
+    }
+
+    /**
      * @return bool
      */
     protected function isActive()
@@ -246,7 +264,7 @@ class Darwinpricing extends Module
         $serverUrl = Configuration::get('DARWINPRICING_SERVER_URL', null);
         $clientId = Configuration::get('DARWINPRICING_CLIENT_ID', null);
         $clientSecret = Configuration::get('DARWINPRICING_CLIENT_SECRET', null);
-        return ($liveMode && isset($serverUrl) && isset($clientId) && isset($clientSecret));
+        return ($liveMode && strlen($serverUrl) && strlen($clientId) && strlen($clientSecret));
     }
 
     /**

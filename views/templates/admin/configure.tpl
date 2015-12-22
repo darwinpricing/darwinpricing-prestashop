@@ -18,6 +18,16 @@
 *  @license   http://www.gnu.org/licenses/lgpl.txt GNU Lesser General Public License (LGPL 3.0)
 *}
 
+{if isset($message.success)}
+<div class="alert alert-success" role="alert">{$message.success|escape}</div>
+{/if}
+{if isset($message.warning)}
+<div class="alert alert-warning" role="alert">{$message.warning|escape}</div>
+{/if}
+{if isset($message.danger)}
+<div class="alert alert-danger" role="alert">{$message.danger|escape}</div>
+{/if}
+
 <div class="panel">
 	<h3><i class="icon icon-globe"></i> {l s='Darwin Pricing - Geo-Targeted Sales for Profit' mod='darwinpricing'}</h3>
 	<p>
